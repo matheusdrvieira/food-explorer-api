@@ -1,33 +1,25 @@
 const AppError = require("../utils/AppError");
 const bcrypt = require('bcryptjs');
 const knex = require("../database/knex");
+const UserRepository = require("../repositories/user/userRepository");
 
 class UsersController {
     async create(request, response) {
         const { name, email, password } = request.body;
 
-        const user = await knex('USERS').where({ email }).first();
+        const userRepository = new UserRepository()
 
-        if (user) {
+        const checkUserExists = await userRepository.findByEmail(email);
+
+        if (checkUserExists) {
             throw new AppError("E-mail já registrado.");
         }
 
         const hashedPassword = await bcrypt.hash(password, 8);
 
-        try {
-            await knex('USERS').insert({
-                name,
-                email,
-                password: hashedPassword,
-                created_at: new Date(),
-                updated_at: new Date(),
-            });
+        await userRepository.create({ name, email, password: hashedPassword });
 
-            return response.status(201).json({ message: 'Usuário criado com sucesso!' });
-
-        } catch (error) {
-            return response.status(500).json({ error: 'Erro ao criar usuário.' });
-        }
+        return response.status(201).json({ message: 'Usuário criado com sucesso!' });
     }
 
     async update(request, response) {
