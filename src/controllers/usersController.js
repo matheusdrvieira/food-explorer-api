@@ -9,7 +9,7 @@ class UsersController {
         const user = await knex('USERS').where({ email }).first();
 
         if (user) {
-            throw new AppError("Email already registered.");
+            throw new AppError("E-mail já registrado.");
         }
 
         const hashedPassword = await bcrypt.hash(password, 8);
@@ -23,10 +23,10 @@ class UsersController {
                 updated_at: new Date(),
             });
 
-            return response.status(201).json({ message: 'User created successfully!' });
+            return response.status(201).json({ message: 'Usuário criado com sucesso!' });
 
         } catch (error) {
-            return response.status(500).json({ error: 'Error creating user.' });
+            return response.status(500).json({ error: 'Erro ao criar usuário.' });
         }
     }
 
@@ -38,19 +38,19 @@ class UsersController {
             const user = await knex('USERS').where({ id }).first();
 
             if (!user) {
-                return response.status(400).json({ message: 'User not found.' });
+                return response.status(400).json({ message: 'Usuário não encontrado.' });
             }
 
             if (email && email !== user.email) {
                 const emailExists = await knex('USERS').where({ email }).first();
 
                 if (emailExists) {
-                    return response.status(400).json({ message: 'Email already registered.' });
+                    return response.status(400).json({ message: 'E-mail já registrado.' });
                 }
             }
 
             if (old_Password && !(await bcrypt.compare(old_Password, user.password))) {
-                return response.status(401).json({ message: 'Invalid password.' });
+                return response.status(401).json({ message: 'Senha inválida.' });
             }
 
             const hashedPassword = password ? await bcrypt.hash(password, 8) : user.password;
@@ -64,11 +64,11 @@ class UsersController {
 
             await knex('USERS').where({ id }).update(updatedUser);
 
-            return response.status(200).json({ message: 'User updated successfully!' });
+            return response.status(200).json({ message: 'Usuário atualizado com sucesso!' });
         } catch (error) {
             console.error(error);
 
-            return response.status(500).json({ message: 'Error updating user.' });
+            return response.status(500).json({ message: 'Erro ao atualizar o usuário.' });
         }
     }
 }

@@ -8,7 +8,7 @@ class SessionsController {
     async create(request, response) {
         const { email, password } = request.body
 
-        const user = await knex("users").where({ email }).first();
+        const user = await knex("USERS").where({ email }).first();
 
         if (!user) {
             throw new AppError("E-mail e/ou senha incorreta", 401);

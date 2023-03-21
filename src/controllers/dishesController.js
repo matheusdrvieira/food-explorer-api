@@ -21,7 +21,7 @@ class DishesController {
 
         await knex("INGREDIENT").insert(ingredientsInsert);
 
-        return response.json();
+        return response.status(200).json({ message: "Prato criado com sucesso" });
     }
 
     async show(request, response) {
@@ -38,14 +38,14 @@ class DishesController {
     async delete(request, response) {
         const { id } = request.params;
 
-        const ingredientIds = await knex("INGREDIENT")
+        const ingredient_id = await knex("INGREDIENT")
             .where({ dish_id: id })
             .pluck("id");
 
         await knex.transaction(async trx => {
 
             await trx("INGREDIENT")
-                .whereIn("id", ingredientIds)
+                .whereIn("id", ingredient_id)
                 .delete();
 
             await trx("DISH")
@@ -53,7 +53,7 @@ class DishesController {
                 .delete();
         });
 
-        return response.json();
+        return response.json({ message: "Prato deletado com sucesso" });
     }
 
     async index(request, response) {

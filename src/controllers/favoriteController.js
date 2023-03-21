@@ -14,7 +14,7 @@ class FavoriteController {
                 .first();
 
             if (favorite) {
-                return response.status(400).json({ error: "This dish is already in your favorites" });
+                return response.status(400).json({ error: "Este prato já está nos seus favoritos" });
             }
 
             await knex("FAVORITE").insert({
@@ -22,7 +22,7 @@ class FavoriteController {
                 dish_id: dish_id
             });
 
-            return response.status(201).json({ message: "dish successfully added" });
+            return response.status(201).json({ message: "Prato adicionado com sucesso" });
 
         } catch (error) {
             console.error(error);
@@ -43,7 +43,7 @@ class FavoriteController {
                 .first();
 
             if (!favorite) {
-                return response.status(400).json({ error: "This dish is not in your favorites" });
+                return response.status(400).json({ error: "Este prato não está nos seus favoritos" });
             }
 
             await knex("FAVORITE")
@@ -53,7 +53,7 @@ class FavoriteController {
                 })
                 .delete();
 
-            return response.status(200).json({ message: "successfully deleted dish" });
+            return response.status(200).json({ message: "Prato removido com sucesso" });
 
         } catch (error) {
             console.error(error);
