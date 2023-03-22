@@ -12,12 +12,10 @@ const upload = multer(uploadConfig.MULTER_IMAGE);
 const dishController = new DishesController();
 const dishImage = new DishImage();
 
-dishesRoutes.use(ensureAuthenticated);
-
-dishesRoutes.post("/", dishController.create);
-dishesRoutes.get("/:id", dishController.show);
-dishesRoutes.delete("/:id", dishController.delete);
-dishesRoutes.get("/", dishController.index);
-dishesRoutes.patch("/:id/image", ensureAuthenticated, upload.single("image"), dishImage.update);
+dishesRoutes.post("/", ensureAuthenticated(true), dishController.create);
+dishesRoutes.get("/:id", ensureAuthenticated(false), dishController.show);
+dishesRoutes.delete("/:id", ensureAuthenticated(true), dishController.delete);
+dishesRoutes.get("/", ensureAuthenticated(false), dishController.index);
+dishesRoutes.patch("/:id/image", ensureAuthenticated(true), upload.single("image"), dishImage.update);
 
 module.exports = dishesRoutes;

@@ -3,7 +3,7 @@ const knex = require("../database/knex");
 class FavoriteController {
     async create(request, response) {
         const user_id = request.user.id;
-        const dish_id = request.params.id;
+        const { dish_id } = request.body;
 
         try {
             const favorite = await knex("FAVORITE")
@@ -59,6 +59,17 @@ class FavoriteController {
             console.error(error);
             return response.status(500).json({ error: "Internal server error" });
         }
+    }
+
+    async index(request, response) {
+        const user_id = request.user.id;
+
+        const favorites = await knex("FAVORITE as FV")
+            .select("D.*")
+            .innerJoin("DISH as D", "D.id", "FV.dish_id")
+            .where({ "FV.user_id": user_id })
+
+        return response.json({ favorites });
     }
 }
 

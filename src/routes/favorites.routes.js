@@ -6,9 +6,10 @@ const ensureAuthenticated = require("../middlewares/ensureAuthenticated");
 const favoritesRoutes = Router();
 const favoriteController = new FavoriteController();
 
-favoritesRoutes.use(ensureAuthenticated);
+favoritesRoutes.use(ensureAuthenticated(false));
 
-favoritesRoutes.post("/:id", favoriteController.create);
+favoritesRoutes.post("/", favoriteController.create);
 favoritesRoutes.delete("/:id", favoriteController.delete);
+favoritesRoutes.get("/:id", favoriteController.index);
 
 module.exports = favoritesRoutes;

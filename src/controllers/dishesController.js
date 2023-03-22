@@ -2,6 +2,8 @@ const knex = require("../database/knex");
 
 class DishesController {
     async create(request, response) {
+        const is_admin = request.user.is_admin
+        console.log(is_admin);
         const { name, description, category, image, price, ingredients } = request.body;
 
         const dish = await knex("DISH").insert({
@@ -27,11 +29,11 @@ class DishesController {
     async show(request, response) {
         const { id } = request.params;
         const dish = await knex("DISH").where({ id }).first();
-        const tags = await knex("INGREDIENT").where({ dish_id: id }).orderBy("name");
+        const ingredients = await knex("INGREDIENT").where({ dish_id: id }).orderBy("name");
 
         return response.json({
             ...dish,
-            tags
+            ingredients
         });
     }
 

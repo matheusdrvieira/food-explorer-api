@@ -18,6 +18,12 @@ class UserRepository {
 
         return { id: user_id };
     }
+
+    async findById(id) {
+        const user_id = await knex('USERS').where({ id }).first();
+
+        return user_id;
+    }
 }
 
 module.exports = UserRepository;

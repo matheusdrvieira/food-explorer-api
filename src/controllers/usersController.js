@@ -27,29 +27,28 @@ class UsersController {
         const id = request.user.id;
 
         try {
-            const user = await knex('USERS').where({ id }).first();
+            const userRepository = new UserRepository()
 
-            if (!user) {
+            const checkUserId = await userRepository.findById(id);
+
+            if (!checkUserId) {
                 return response.status(400).json({ message: 'Usuário não encontrado.' });
             }
 
-            if (email && email !== user.email) {
-                const emailExists = await knex('USERS').where({ email }).first();
-
-                if (emailExists) {
-                    return response.status(400).json({ message: 'E-mail já registrado.' });
-                }
+            if (checkUserId.email && email !== checkUserId.email) {
+                return response.status(400).json({ message: 'E-mail já registrado.' });
             }
 
-            if (old_Password && !(await bcrypt.compare(old_Password, user.password))) {
+            if (checkUserId.password && (await bcrypt.compare(old_Password, checkUserId.password))) {
+                var hashedPassword = checkUserId.password ? await bcrypt.hash(password, 8) : checkUserId.password;
+
+            } else {
                 return response.status(401).json({ message: 'Senha inválida.' });
             }
 
-            const hashedPassword = password ? await bcrypt.hash(password, 8) : user.password;
-
             const updatedUser = {
-                name: name || user.name,
-                email: email || user.email,
+                name: name || checkUserId.name,
+                email: email || checkUserId.email,
                 password: hashedPassword,
                 updated_at: new Date(),
             };

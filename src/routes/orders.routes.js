@@ -6,9 +6,8 @@ const ordersRoutes = Router();
 
 const ordersController = new OrdersController();
 
-ordersRoutes.use(ensureAuthenticated);
-
-ordersRoutes.post("/", ordersController.create);
-ordersRoutes.delete("/:id", ordersController.delete);
+ordersRoutes.post("/", ensureAuthenticated(false), ordersController.create);
+ordersRoutes.get("/", ensureAuthenticated(false), ordersController.index);
+ordersRoutes.patch("/:id", ensureAuthenticated(true), ordersController.updateStatus);
 
 module.exports = ordersRoutes;

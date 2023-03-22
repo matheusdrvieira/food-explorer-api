@@ -10,6 +10,7 @@ const database = require("./database/sqlite");
 const app = express();
 app.use(express.json());
 app.use("/files", express.static(uploadConfig.UPLOADS_AVATAR_FOLDER));
+app.use("/image", express.static(uploadConfig.UPLOADS_IMAGE_FOLDER));
 app.use(routes);
 
 database();

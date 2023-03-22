@@ -6,6 +6,6 @@ const ingredientsRoutes = Router();
 
 const ingredientController = new IngredientController();
 
-ingredientsRoutes.get("/:id", ensureAuthenticated, ingredientController.index);
+ingredientsRoutes.get("/:id", ensureAuthenticated(false), ingredientController.index);
 
 module.exports = ingredientsRoutes;

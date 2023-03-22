@@ -3,14 +3,17 @@ const AppError = require("../utils/AppError");
 const { compare } = require("bcryptjs");
 const authConfig = require("../configs/auth");
 const { sign } = require("jsonwebtoken");
+const UserRepository = require("../repositories/user/userRepository");
 
 class SessionsController {
     async create(request, response) {
         const { email, password } = request.body
 
-        const user = await knex("USERS").where({ email }).first();
+        const userRepository = new UserRepository()
 
-        if (!user) {
+        const user = await userRepository.findByEmail(email);
+
+        if (!user.email) {
             throw new AppError("E-mail e/ou senha incorreta", 401);
         }
 
@@ -20,11 +23,8 @@ class SessionsController {
             throw new AppError("E-mail e/ou senha incorreta", 401);
         }
 
-        const { secret, expiresIn } = authConfig.jwt;
-        const token = sign({}, secret, {
-            subject: String(user.id),
-            expiresIn
-        });
+        const { secret } = authConfig.jwt;
+        const token = sign({ user_id: user.id, is_admin: Boolean(user.is_admin) }, secret);
 
         return response.json({ user, token })
     }
