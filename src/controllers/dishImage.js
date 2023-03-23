@@ -7,27 +7,32 @@ class DishImage {
         const { id } = request.params;
         const imageFilename = request.file.filename;
 
-        const diskStorage = new DiskStorage();
+        try {
+            const diskStorage = new DiskStorage();
 
-        const dish = await knex("DISH")
-            .where({ id })
-            .first();
+            const dish = await knex("DISH")
+                .where({ id })
+                .first();
 
-        if (!dish) {
-            throw new AppError("Prato não encontrado", 404);
+            if (!dish) {
+                throw new AppError("Prato não encontrado", 404);
+            }
+
+            if (dish.image) {
+                await diskStorage.deleteFile(dish.image);
+            }
+
+            dish.image = imageFilename;
+
+            await knex("DISH")
+                .where({ id })
+                .update({ image: imageFilename });
+
+            return response.json(dish);
+        } catch (error) {
+
+            return response.status().json({ error: "internal server error" });
         }
-
-        if (dish.image) {
-            await diskStorage.deleteFile(dish.image);
-        }
-
-        dish.image = imageFilename;
-
-        await knex("DISH")
-            .where({ id })
-            .update({ image: imageFilename });
-
-        return response.json(dish);
     }
 }
 

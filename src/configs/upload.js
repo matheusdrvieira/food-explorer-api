@@ -30,8 +30,6 @@ const MULTER_IMAGE = {
     }),
 };
 
-
-
 module.exports = {
     TMP_FOLDER,
     UPLOADS_AVATAR_FOLDER,

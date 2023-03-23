@@ -25,7 +25,7 @@ class FavoriteController {
             return response.status(201).json({ message: "Prato adicionado com sucesso" });
 
         } catch (error) {
-            console.error(error);
+
             return response.status(500).json({ error: "Internal server error" });
         }
     }
@@ -56,7 +56,7 @@ class FavoriteController {
             return response.status(200).json({ message: "Prato removido com sucesso" });
 
         } catch (error) {
-            console.error(error);
+
             return response.status(500).json({ error: "Internal server error" });
         }
     }
@@ -64,12 +64,17 @@ class FavoriteController {
     async index(request, response) {
         const user_id = request.user.id;
 
-        const favorites = await knex("FAVORITE as FV")
-            .select("D.*")
-            .innerJoin("DISH as D", "D.id", "FV.dish_id")
-            .where({ "FV.user_id": user_id })
+        try {
+            const favorites = await knex("FAVORITE as FV")
+                .select("D.*")
+                .innerJoin("DISH as D", "D.id", "FV.dish_id")
+                .where({ "FV.user_id": user_id })
 
-        return response.json({ favorites });
+            return response.json({ favorites });
+        } catch (error) {
+
+            return response.status().json({ error: "internal server error" });
+        }
     }
 }
 

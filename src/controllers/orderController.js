@@ -5,11 +5,10 @@ const OrderStatus = require("../enum/orderStatus");
 
 class OrderController {
     async create(request, response) {
+        const user_id = request.user.id;
+        const { dishes, amount, payment } = request.body;
+
         try {
-            const user_id = request.user.id;
-
-            const { dishes, amount, payment } = request.body;
-
             if (!Object.values(PaymentMethod).includes(payment)) {
 
                 return response.status(400).json({ message: "Método de pagamento inválido" });
@@ -27,7 +26,6 @@ class OrderController {
 
             return response.json({ message: "Pedido criado com sucesso!" });
         } catch (error) {
-            console.error(error);
 
             return response.status(500).json({ message: "Erro ao criar o pedido" });
         }
@@ -36,34 +34,43 @@ class OrderController {
     async index(request, response) {
         const userId = request.user.id;
 
-        const orders = await knex("ORDER").where({ user_id: userId })
+        try {
+            const orders = await knex("ORDER").where({ user_id: userId })
 
-        await Promise.all(orders.map(async order => {
-            const dishes = await knex("ORDER_DISH as OD")
-                .select("D.name", "OD.quantity")
-                .innerJoin("DISH as D", "D.id", "OD.dish_id")
-                .where({ order_id: order.id })
+            await Promise.all(orders.map(async order => {
+                const dishes = await knex("ORDER_DISH as OD")
+                    .select("D.name", "OD.quantity")
+                    .innerJoin("DISH as D", "D.id", "OD.dish_id")
+                    .where({ order_id: order.id })
 
-            order.dishes = dishes;
-        }));
+                order.dishes = dishes;
+            }));
 
-        return response.json({ orders });
+            return response.json({ orders });
+        } catch (error) {
+
+            return response.status().json({ error: "internal server error" });
+        }
     }
 
     async updateStatus(request, response) {
         const order_id = request.params.id;
         const { status } = request.body;
 
-        if (!Object.values(OrderStatus).includes(status)) {
+        try {
+            if (!Object.values(OrderStatus).includes(status)) {
 
-            return response.status(400).json({ message: "Status do pedido inválido" });
+                return response.status(400).json({ message: "Status do pedido inválido" });
+            }
+
+            await knex("ORDER").update({ status, updated_at: knex.fn.now() }).where({ id: order_id })
+
+            return response.status(200).json({ message: "Status atualizado com sucesso" })
+        } catch (error) {
+
+            return response.status().json({ error: "internal server error" });
         }
-
-        await knex("ORDER").update({ status }).where({ id: order_id })
-
-        return response.status(200).json({ message: "Status atualizado com sucesso" })
     }
-
 }
 
 module.exports = OrderController;

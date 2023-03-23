@@ -17,7 +17,7 @@ function ensureAuthenticated(shouldIsAdmin) {
             const { user_id, is_admin } = verify(token, authConfig.jwt.secret);
 
             if (shouldIsAdmin && !Boolean(is_admin)) {
-                return response.status(403).json({ message: "Voce nao tem permissao para acessar esse recurso" })
+                return response.status(403).json({ message: "Você não tem permissão para acessar esse recurso" })
             }
 
             request.user = {

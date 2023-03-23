@@ -7,19 +7,24 @@ class UsersController {
     async create(request, response) {
         const { name, email, password } = request.body;
 
-        const userRepository = new UserRepository()
+        try {
+            const userRepository = new UserRepository()
+            const checkUserExists = await userRepository.findByEmail(email);
 
-        const checkUserExists = await userRepository.findByEmail(email);
+            if (checkUserExists) {
+                throw new AppError("E-mail já registrado.");
+            }
 
-        if (checkUserExists) {
-            throw new AppError("E-mail já registrado.");
+            const hashedPassword = await bcrypt.hash(password, 8);
+
+            await userRepository.create({ name, email, password: hashedPassword });
+
+            return response.status(201).json({ message: 'Usuário criado com sucesso!' });
+
+        } catch (error) {
+
+            return response.status(500).json({ error: 'Erro ao tentar criar o usuário.' });
         }
-
-        const hashedPassword = await bcrypt.hash(password, 8);
-
-        await userRepository.create({ name, email, password: hashedPassword });
-
-        return response.status(201).json({ message: 'Usuário criado com sucesso!' });
     }
 
     async update(request, response) {
@@ -27,39 +32,62 @@ class UsersController {
         const id = request.user.id;
 
         try {
-            const userRepository = new UserRepository()
+            const user = await knex('USERS').where({ id }).first();
 
-            const checkUserId = await userRepository.findById(id);
-
-            if (!checkUserId) {
+            if (!user) {
                 return response.status(400).json({ message: 'Usuário não encontrado.' });
             }
 
-            if (checkUserId.email && email !== checkUserId.email) {
+            const userWithUpdatedEmail = await knex('USERS').where({ email }).first();
+
+            if (userWithUpdatedEmail && userWithUpdatedEmail.id !== user.id) {
                 return response.status(400).json({ message: 'E-mail já registrado.' });
             }
 
-            if (checkUserId.password && (await bcrypt.compare(old_Password, checkUserId.password))) {
-                var hashedPassword = checkUserId.password ? await bcrypt.hash(password, 8) : checkUserId.password;
+            user.name = name ?? user.name;
+            user.email = email ?? user.email;
 
-            } else {
-                return response.status(401).json({ message: 'Senha inválida.' });
+            if (password && !old_Password) {
+                throw new AppError("Você precisa informar a senha antiga para definir a nova senha");
             }
 
-            const updatedUser = {
-                name: name || checkUserId.name,
-                email: email || checkUserId.email,
-                password: hashedPassword,
-                updated_at: new Date(),
-            };
+            if (password && old_Password) {
 
-            await knex('USERS').where({ id }).update(updatedUser);
+                const checkOldPassword = await bcrypt.compare(old_Password, user.password)
+
+                if (!checkOldPassword) {
+                    throw new AppError("A senha antiga nao confere.");
+                }
+
+                user.password = await bcrypt.hash(password, 8);
+            }
+
+            await knex('USERS').where({ id })
+                .update({
+                    name: user.name,
+                    email: user.email,
+                    password: user.password,
+                    updated_at: knex.fn.now()
+                });
 
             return response.status(200).json({ message: 'Usuário atualizado com sucesso!' });
         } catch (error) {
-            console.error(error);
 
-            return response.status(500).json({ message: 'Erro ao atualizar o usuário.' });
+            return response.status(500).json({ error: 'Erro ao atualizar o usuário.' });
+        }
+    }
+
+    async index(request, response) {
+        const { startDate, endDate } = request.query;
+
+        try {
+
+
+
+
+        } catch (error) {
+
+            return response.status(500).json({ error: 'Internal server error' });
         }
     }
 }

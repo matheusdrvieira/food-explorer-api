@@ -11,9 +11,7 @@ class UserRepository {
         const user_id = await knex('USERS').insert({
             name,
             email,
-            password,
-            created_at: new Date(),
-            updated_at: new Date(),
+            password
         });
 
         return { id: user_id };
@@ -23,6 +21,12 @@ class UserRepository {
         const user_id = await knex('USERS').where({ id }).first();
 
         return user_id;
+    }
+
+    async findByPassword(password) {
+        const checkPassword = await knex('USERS').where({ password }).first();
+
+        return checkPassword;
     }
 }
 
