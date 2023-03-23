@@ -28,7 +28,7 @@ class UserAvatar {
             return response.json(user);
         } catch (error) {
 
-            return response.status().json({ error: "internal server error" });
+            return response.status(500).json({ error: "internal server error" });
         }
     }
 }

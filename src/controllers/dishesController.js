@@ -42,7 +42,7 @@ class DishesController {
             });
         } catch (error) {
 
-            return response.status().json({ error: "internal server error" });
+            return response.status(500).json({ error: "internal server error" });
         }
     }
 
@@ -68,7 +68,7 @@ class DishesController {
             return response.json({ message: "Prato deletado com sucesso" });
         } catch (error) {
 
-            return response.status().json({ error: "internal server error" });
+            return response.status(500).json({ error: "internal server error" });
         }
     }
 
@@ -93,7 +93,7 @@ class DishesController {
             return response.json(dishes);
         } catch (error) {
 
-            return response.status().json({ error: "internal server error" });
+            return response.status(500).json({ error: "internal server error" });
         }
     }
 

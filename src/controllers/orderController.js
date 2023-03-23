@@ -68,7 +68,7 @@ class OrderController {
             return response.status(200).json({ message: "Status atualizado com sucesso" })
         } catch (error) {
 
-            return response.status().json({ error: "internal server error" });
+            return response.status(500).json({ error: "internal server error" });
         }
     }
 }

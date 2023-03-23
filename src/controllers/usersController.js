@@ -32,13 +32,14 @@ class UsersController {
         const id = request.user.id;
 
         try {
-            const user = await knex('USERS').where({ id }).first();
+            const userRepository = new UserRepository()
+            const user = await userRepository.findById(id);
 
             if (!user) {
                 return response.status(400).json({ message: 'Usuário não encontrado.' });
             }
 
-            const userWithUpdatedEmail = await knex('USERS').where({ email }).first();
+            const userWithUpdatedEmail = await userRepository.findByEmail(email);
 
             if (userWithUpdatedEmail && userWithUpdatedEmail.id !== user.id) {
                 return response.status(400).json({ message: 'E-mail já registrado.' });
@@ -70,6 +71,16 @@ class UsersController {
                     updated_at: knex.fn.now()
                 });
 
+            /* 
+            await userRepository
+                 .update({
+                     name: user.name,
+                     email: user.email,
+                     password: user.password,
+                     updated_at: knex.fn.now()
+                 });
+            */
+
             return response.status(200).json({ message: 'Usuário atualizado com sucesso!' });
         } catch (error) {
 
@@ -81,15 +92,24 @@ class UsersController {
         const { startDate, endDate } = request.query;
 
         try {
+            const orders = await knex("ORDER").whereBetween("ORDER.created_at", [startDate, endDate])
 
+            await Promise.all(orders.map(async order => {
+                const dishes = await knex("ORDER_DISH as OD")
+                    .select("D.name", "OD.quantity")
+                    .innerJoin("DISH as D", "D.id", "OD.dish_id")
+                    .where({ order_id: order.id })
 
+                order.dishes = dishes;
+            }));
 
-
+            return response.status(200).json({ orders })
         } catch (error) {
 
-            return response.status(500).json({ error: 'Internal server error' });
+            return response.json({ error: 'Internal server error' });
         }
     }
 }
 
 module.exports = UsersController;
+

@@ -2,9 +2,9 @@ const knex = require("../../database/knex");
 
 class UserRepository {
     async findByEmail(email) {
-        const user = await knex('USERS').where({ email }).first();
+        const userEmail = await knex('USERS').where({ email }).first();
 
-        return user;
+        return userEmail;
     }
 
     async create({ name, email, password }) {
@@ -18,15 +18,24 @@ class UserRepository {
     }
 
     async findById(id) {
-        const user_id = await knex('USERS').where({ id }).first();
+        const userId = await knex('USERS').where({ id }).first();
 
-        return user_id;
+        return userId;
     }
 
-    async findByPassword(password) {
-        const checkPassword = await knex('USERS').where({ password }).first();
+    async update({ id, name, email, password, updated_at }) {
+        const updateUserId = await knex('USERS')
+            .update({
+                id,
+                name,
+                email,
+                password,
+                updated_at
+            });
 
-        return checkPassword;
+        console.log(updateUserId);
+
+        return { id: updateUserId };
     }
 }
 
