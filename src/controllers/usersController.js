@@ -8,7 +8,7 @@ class UsersController {
         const { name, email, password } = request.body;
 
         try {
-            const userRepository = new UserRepository()
+            const userRepository = new UserRepository();
             const checkUserExists = await userRepository.findByEmail(email);
 
             if (checkUserExists) {
@@ -32,7 +32,7 @@ class UsersController {
         const id = request.user.id;
 
         try {
-            const userRepository = new UserRepository()
+            const userRepository = new UserRepository();
             const user = await userRepository.findById(id);
 
             if (!user) {
@@ -54,7 +54,7 @@ class UsersController {
 
             if (password && old_Password) {
 
-                const checkOldPassword = await bcrypt.compare(old_Password, user.password)
+                const checkOldPassword = await bcrypt.compare(old_Password, user.password);
 
                 if (!checkOldPassword) {
                     throw new AppError("A senha antiga nao confere.");
@@ -63,23 +63,15 @@ class UsersController {
                 user.password = await bcrypt.hash(password, 8);
             }
 
-            await knex('USERS').where({ id })
+            await userRepository
                 .update({
+                    id: user.id,
                     name: user.name,
                     email: user.email,
                     password: user.password,
                     updated_at: knex.fn.now()
                 });
 
-            /* 
-            await userRepository
-                 .update({
-                     name: user.name,
-                     email: user.email,
-                     password: user.password,
-                     updated_at: knex.fn.now()
-                 });
-            */
 
             return response.status(200).json({ message: 'Usuário atualizado com sucesso!' });
         } catch (error) {
@@ -91,19 +83,12 @@ class UsersController {
     async index(request, response) {
         const { startDate, endDate } = request.query;
 
+
         try {
-            const orders = await knex("ORDER").whereBetween("ORDER.created_at", [startDate, endDate])
+            const userRepository = new UserRepository();
+            const orders = await userRepository.index(startDate, endDate);
 
-            await Promise.all(orders.map(async order => {
-                const dishes = await knex("ORDER_DISH as OD")
-                    .select("D.name", "OD.quantity")
-                    .innerJoin("DISH as D", "D.id", "OD.dish_id")
-                    .where({ order_id: order.id })
-
-                order.dishes = dishes;
-            }));
-
-            return response.status(200).json({ orders })
+            return response.status(200).json({ orders });
         } catch (error) {
 
             return response.json({ error: 'Internal server error' });

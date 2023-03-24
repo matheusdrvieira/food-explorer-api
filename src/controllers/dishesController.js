@@ -113,27 +113,26 @@ class DishesController {
                     updated_at: knex.fn.now()
                 });
 
-            const currentIngredients = await knex('INGREDIENT')
+            const ingredient = await knex('INGREDIENT')
                 .where({ dish_id: dishId })
                 .select('id', 'name');
 
-            // Cria um objeto com os ingredientes atuais, onde a chave é o nome do ingrediente
+
             const currentIngredientsObj = {};
-            currentIngredients.forEach(ing => {
+            ingredient.forEach(ing => {
                 currentIngredientsObj[ing.name] = ing;
             });
 
-            // Atualiza ou adiciona os ingredientes no banco de dados
             for (const ing of ingredients) {
                 const currentIng = currentIngredientsObj[ing];
+
                 if (currentIng) {
-                    // Se o ingrediente já existir, atualiza-o
                     await knex('INGREDIENT')
                         .where({ id: currentIng.id })
                         .update({ name: ing });
                     delete currentIngredientsObj[ing];
+
                 } else {
-                    // Se o ingrediente for novo, adiciona-o
                     await knex('INGREDIENT').insert({
                         name: ing,
                         dish_id: dishId
@@ -141,8 +140,8 @@ class DishesController {
                 }
             }
 
-            // Deleta os ingredientes que foram removidos do prato
             const deletedIngredients = Object.values(currentIngredientsObj);
+
             if (deletedIngredients.length > 0) {
                 const deletedIds = deletedIngredients.map(ing => ing.id);
                 await knex('INGREDIENT').whereIn('id', deletedIds).delete();

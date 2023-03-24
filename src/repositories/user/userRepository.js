@@ -8,13 +8,13 @@ class UserRepository {
     }
 
     async create({ name, email, password }) {
-        const user_id = await knex('USERS').insert({
+        const createUserId = await knex('USERS').insert({
             name,
             email,
             password
         });
 
-        return { id: user_id };
+        return { id: createUserId };
     }
 
     async findById(id) {
@@ -25,17 +25,31 @@ class UserRepository {
 
     async update({ id, name, email, password, updated_at }) {
         const updateUserId = await knex('USERS')
+            .where({ id })
             .update({
                 id,
                 name,
                 email,
                 password,
                 updated_at
-            });
-
-        console.log(updateUserId);
+            })
 
         return { id: updateUserId };
+    }
+
+    async index(startDate, endDate) {
+        const orders = await knex("ORDER").whereBetween("ORDER.created_at", [startDate, endDate])
+
+        await Promise.all(orders.map(async order => {
+            const dishes = await knex("ORDER_DISH as OD")
+                .select("D.name", "OD.quantity")
+                .innerJoin("DISH as D", "D.id", "OD.dish_id")
+                .where({ order_id: order.id })
+
+            order.dishes = dishes;
+        }));
+
+        return orders;
     }
 }
 

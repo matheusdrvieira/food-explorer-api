@@ -1,11 +1,10 @@
 const knex = require("../database/knex");
-
 const PaymentMethod = require("../enum/paymentMethod");
 const OrderStatus = require("../enum/orderStatus");
 
 class OrderController {
     async create(request, response) {
-        const user_id = request.user.id;
+        const userId = request.user.id;
         const { dishes, amount, payment } = request.body;
 
         try {
@@ -14,7 +13,7 @@ class OrderController {
                 return response.status(400).json({ message: "Método de pagamento inválido" });
             }
 
-            const [order_id] = await knex("ORDER").insert({ user_id: user_id, amount, payment, status: OrderStatus.PENDING });
+            const [order_id] = await knex("ORDER").insert({ user_id: userId, amount, payment, status: OrderStatus.PENDING });
 
             for (const dish of dishes) {
                 await knex("ORDER_DISH").insert({
@@ -54,7 +53,7 @@ class OrderController {
     }
 
     async updateStatus(request, response) {
-        const order_id = request.params.id;
+        const orderId = request.params.id;
         const { status } = request.body;
 
         try {
@@ -63,7 +62,7 @@ class OrderController {
                 return response.status(400).json({ message: "Status do pedido inválido" });
             }
 
-            await knex("ORDER").update({ status, updated_at: knex.fn.now() }).where({ id: order_id })
+            await knex("ORDER").update({ status, updated_at: knex.fn.now() }).where({ id: orderId })
 
             return response.status(200).json({ message: "Status atualizado com sucesso" })
         } catch (error) {
