@@ -1,4 +1,5 @@
 const knex = require("../database/knex");
+const AppError = require("../utils/AppError");
 
 class FavoriteController {
     async create(request, response) {
@@ -14,6 +15,7 @@ class FavoriteController {
                 .first();
 
             if (favorite) {
+
                 return response.status(400).json({ error: "Este prato já está nos seus favoritos" });
             }
 
@@ -26,7 +28,7 @@ class FavoriteController {
 
         } catch (error) {
 
-            return response.status(500).json({ error: "Internal server error" });
+            throw new AppError(error.message, 500);
         }
     }
 
@@ -57,7 +59,7 @@ class FavoriteController {
 
         } catch (error) {
 
-            return response.status(500).json({ error: "Internal server error" });
+            throw new AppError(error.message, 500);
         }
     }
 
@@ -73,7 +75,7 @@ class FavoriteController {
             return response.json({ favorites });
         } catch (error) {
 
-            return response.status(500).json({ error: "internal server error" });
+            throw new AppError(error.message, 500);
         }
     }
 }

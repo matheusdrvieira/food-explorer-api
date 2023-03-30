@@ -1,4 +1,5 @@
 const knex = require("../database/knex");
+const AppError = require("../utils/AppError");
 
 class DishesController {
     async create(request, response) {
@@ -13,10 +14,10 @@ class DishesController {
                 price
             });
 
-            const ingredientsInsert = ingredients.map(name => {
+            const ingredientsInsert = ingredients.map(ingredient => {
                 return {
                     "dish_id": dish[0],
-                    name
+                    name: ingredient
                 }
             });
 
@@ -25,7 +26,7 @@ class DishesController {
             return response.status(200).json({ message: "Prato criado com sucesso" });
         } catch (error) {
 
-            return response.status(500).json({ error: "internal server error" });
+            throw new AppError(error.message, 500);
         }
     }
 
@@ -42,7 +43,7 @@ class DishesController {
             });
         } catch (error) {
 
-            return response.status(500).json({ error: "internal server error" });
+            throw new AppError(error.message, 500);
         }
     }
 
@@ -50,17 +51,8 @@ class DishesController {
         const { id } = request.params;
 
         try {
-            const ingredient_id = await knex("INGREDIENT")
-                .where({ dish_id: id })
-                .pluck("id");
-
-            await knex.transaction(async trx => {
-
-                await trx("INGREDIENT")
-                    .whereIn("id", ingredient_id)
-                    .delete();
-
-                await trx("DISH")
+            await knex.transaction(async dish => {
+                await dish("DISH")
                     .where({ id })
                     .delete();
             });
@@ -68,7 +60,7 @@ class DishesController {
             return response.json({ message: "Prato deletado com sucesso" });
         } catch (error) {
 
-            return response.status(500).json({ error: "internal server error" });
+            throw new AppError(error.message, 500);
         }
     }
 
@@ -93,7 +85,7 @@ class DishesController {
             return response.json(dishes);
         } catch (error) {
 
-            return response.status(500).json({ error: "internal server error" });
+            throw new AppError(error.message, 500);
         }
     }
 
@@ -150,7 +142,7 @@ class DishesController {
             return response.json({ message: "Prato atualizado com sucesso" });
         } catch (error) {
 
-            return response.status(500).json({ error: 'Não foi possível atualizar o produto' });
+            throw new AppError(error.message, 500);
         }
     }
 

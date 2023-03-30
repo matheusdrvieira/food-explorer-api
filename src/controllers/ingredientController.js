@@ -1,4 +1,5 @@
 const knex = require("../database/knex");
+const AppError = require("../utils/AppError");
 
 class IngredientController {
     async index(request, response) {
@@ -12,7 +13,7 @@ class IngredientController {
 
         } catch (error) {
 
-            return response.status(500).json({ error: "internal server error" });
+            throw new AppError(error.message, 500);
         }
     }
 }

@@ -1,6 +1,7 @@
 const knex = require("../database/knex");
 const PaymentMethod = require("../enum/paymentMethod");
 const OrderStatus = require("../enum/orderStatus");
+const AppError = require("../utils/AppError");
 
 class OrderController {
     async create(request, response) {
@@ -26,7 +27,7 @@ class OrderController {
             return response.json({ message: "Pedido criado com sucesso!" });
         } catch (error) {
 
-            return response.status(500).json({ message: "Erro ao criar o pedido" });
+            throw new AppError(error.message, 500);
         }
     }
 
@@ -48,7 +49,7 @@ class OrderController {
             return response.json({ orders });
         } catch (error) {
 
-            return response.status().json({ error: "internal server error" });
+            throw new AppError(error.message, 500);
         }
     }
 
@@ -67,7 +68,7 @@ class OrderController {
             return response.status(200).json({ message: "Status atualizado com sucesso" })
         } catch (error) {
 
-            return response.status(500).json({ error: "internal server error" });
+            throw new AppError(error.message, 500);
         }
     }
 }

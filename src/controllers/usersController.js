@@ -23,7 +23,7 @@ class UsersController {
 
         } catch (error) {
 
-            return response.status(500).json({ error: 'Erro ao tentar criar o usuário.' });
+            throw new AppError(error.message, 500);
         }
     }
 
@@ -76,7 +76,7 @@ class UsersController {
             return response.status(200).json({ message: 'Usuário atualizado com sucesso!' });
         } catch (error) {
 
-            return response.status(500).json({ error: 'Erro ao atualizar o usuário.' });
+            throw new AppError(error.message, 500)
         }
     }
 
@@ -91,7 +91,7 @@ class UsersController {
             return response.status(200).json({ orders });
         } catch (error) {
 
-            return response.json({ error: 'Internal server error' });
+            throw new AppError(error.message, 500);
         }
     }
 }
