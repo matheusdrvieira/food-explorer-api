@@ -67,20 +67,22 @@ class DishesController {
     async index(request, response) {
         const { name, ingredient } = request.query;
 
+        console.log(name == "");
+
         try {
             let dishes = await knex("DISH as d")
-                .select("d.*")
+                .select(["d.id",
+                    "d.name",
+                    "d.description",
+                    "d.category_id",
+                    " d.image",
+                    "d.price"
+                ])
                 .distinct()
-                .whereLike("d.name", `%${name == "" ? null : name}%`)
-                .orWhereLike("i.name", `%${ingredient == "" ? null : ingredient}%`)
+                .whereLike("d.name", `%${name}%`)
+                .orWhereLike("i.name", `%${ingredient}%`)
                 .leftJoin("INGREDIENT as I", "d.id", "i.dish_id")
                 .orderBy("d.name");
-
-            await Promise.all(dishes.map(async dish => {
-                const ingredients = await knex("INGREDIENT").select("id", "name").where({ "dish_id": dish.id })
-
-                dish.ingredient = ingredients
-            }));
 
             return response.json(dishes);
         } catch (error) {
