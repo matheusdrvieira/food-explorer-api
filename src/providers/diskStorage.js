@@ -3,9 +3,7 @@ const path = require("path");
 const uploadConfig = require("../configs/upload");
 
 class DiskStorage {
-
     async deleteFile(file) {
-
         const avatarPath = path.resolve(uploadConfig.UPLOADS_AVATAR_FOLDER, file);
         const imagePath = path.resolve(uploadConfig.UPLOADS_IMAGE_FOLDER, file);
 

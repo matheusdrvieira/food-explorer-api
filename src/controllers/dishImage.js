@@ -3,6 +3,23 @@ const AppError = require("../utils/AppError");
 const DiskStorage = require("../providers/diskStorage");
 
 class DishImage {
+    async create(request, response) {
+        const imageFilename = request.file.filename;
+        const dishId = request.params.id;
+
+        try {
+            const dish = await knex("DISH")
+                .where({ id: dishId })
+                .insert({ image: imageFilename });
+
+            return response.json(dish);
+
+        } catch (error) {
+
+            throw new AppError(error.message, 500);
+        }
+    }
+
     async update(request, response) {
         const { id } = request.params;
         const imageFilename = request.file.filename;

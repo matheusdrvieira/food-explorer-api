@@ -6,7 +6,7 @@ const AppError = require("../utils/AppError");
 class OrderController {
     async create(request, response) {
         const userId = request.user.id;
-        const { dishes, amount, payment } = request.body;
+        const { dishes, payment } = request.body;
 
         try {
             if (!Object.values(PaymentMethod).includes(payment)) {
@@ -14,15 +14,34 @@ class OrderController {
                 return response.status(400).json({ message: "Método de pagamento inválido" });
             }
 
-            const [order_id] = await knex("ORDER").insert({ user_id: userId, amount, payment, status: OrderStatus.PENDING });
+            const orders = await knex("ORDER")
+                .select(['ORDER.id', 'ORDER.user_id', 'ORDER.amount'])
+                .where({ user_id: userId })
 
-            for (const dish of dishes) {
-                await knex("ORDER_DISH").insert({
-                    order_id,
-                    dish_id: dish.id,
-                    quantity: dish.quantity
+            await Promise.all(orders.map(async order => {
+
+                const orderlist = await knex("ORDER_DISH")
+                    .select(['DISH.price', 'ORDER_DISH.quantity'])
+                    .innerJoin("DISH", "DISH.id", "ORDER_DISH.dish_id")
+                    .where({ order_id: order.id })
+
+                const total = orderlist.reduce((acc, dish) => acc + dish.price * dish.quantity, 0)
+
+                const [order_id] = await knex("ORDER").insert({
+                    user_id: userId,
+                    amount: total,
+                    payment,
+                    status: OrderStatus.PENDING
                 });
-            }
+
+                for (const dish of dishes) {
+                    await knex("ORDER_DISH").insert({
+                        order_id,
+                        dish_id: dish.id,
+                        quantity: dish.quantity
+                    });
+                }
+            }))
 
             return response.json({ message: "Pedido criado com sucesso!" });
         } catch (error) {
@@ -39,7 +58,7 @@ class OrderController {
 
             await Promise.all(orders.map(async order => {
                 const dishes = await knex("ORDER_DISH as OD")
-                    .select("D.name", "OD.quantity")
+                    .select("D.name", "OD.quantity", "D.price")
                     .innerJoin("DISH as D", "D.id", "OD.dish_id")
                     .where({ order_id: order.id })
 

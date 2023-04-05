@@ -3,18 +3,23 @@ const AppError = require("../utils/AppError");
 
 class DishesController {
     async create(request, response) {
-        const { name, description, category, image, price, ingredients } = request.body;
+        const { name, description, category, price, ingredients } = request.body;
+        const imageFilename = request.file.filename;
+
+
 
         try {
             const dish = await knex("DISH").insert({
                 name,
                 description,
                 category_id: category,
-                image,
-                price
+                price,
+                image: imageFilename
             });
 
-            const ingredientsInsert = ingredients.map(ingredient => {
+            const splitIngredients = ingredients[0].split(",")
+
+            const ingredientsInsert = splitIngredients.map(ingredient => {
                 return {
                     "dish_id": dish[0],
                     name: ingredient
@@ -67,8 +72,6 @@ class DishesController {
     async index(request, response) {
         const { name, ingredient } = request.query;
 
-        console.log(name == "");
-
         try {
             let dishes = await knex("DISH as d")
                 .select(["d.id",
@@ -110,7 +113,6 @@ class DishesController {
             const ingredient = await knex('INGREDIENT')
                 .where({ dish_id: dishId })
                 .select('id', 'name');
-
 
             const currentIngredientsObj = {};
             ingredient.forEach(ing => {
