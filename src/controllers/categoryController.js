@@ -3,7 +3,6 @@ const AppError = require("../utils/AppError");
 
 class CategoyController {
     async index(request, response) {
-
         try {
             const category = await knex("CATEGORY")
                 .select([
