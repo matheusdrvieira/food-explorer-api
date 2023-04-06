@@ -72,7 +72,7 @@ class FavoriteController {
                 .innerJoin("DISH as D", "D.id", "FV.dish_id")
                 .where({ "FV.user_id": user_id })
 
-            return response.json({ favorites });
+            return response.json(favorites);
         } catch (error) {
 
             throw new AppError(error.message, 500);

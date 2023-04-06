@@ -70,6 +70,7 @@ class DishesController {
 
     async index(request, response) {
         const { name, ingredient } = request.query;
+        const userId = request.user.id;
 
         try {
             let dishes = await knex("DISH as d")
@@ -77,13 +78,19 @@ class DishesController {
                     "d.name",
                     "d.description",
                     "d.category_id",
-                    " d.image",
-                    "d.price"
+                    "d.image",
+                    "d.price",
+                    knex.raw("CASE WHEN f.id IS NULL THEN false ELSE true END AS is_favorite")
                 ])
                 .distinct()
                 .whereLike("d.name", `%${name}%`)
                 .orWhereLike("i.name", `%${ingredient}%`)
-                .leftJoin("INGREDIENT as I", "d.id", "i.dish_id")
+                .leftJoin("INGREDIENT as i", "d.id", "i.dish_id")
+                .leftJoin("FAVORITE as f", function () {
+                    this.on("d.id", "=", "f.dish_id")
+                        .andOn("f.user_id", "=", userId);
+                })
+                .whereNotNull("f.id")
                 .orderBy("d.name");
 
             return response.json(dishes);
