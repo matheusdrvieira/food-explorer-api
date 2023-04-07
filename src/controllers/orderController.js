@@ -10,24 +10,26 @@ class OrderController {
 
         try {
             if (!Object.values(PaymentMethod).includes(payment)) {
-
                 return response.status(400).json({ message: "Método de pagamento inválido" });
             }
 
-            const orders = await knex("ORDER")
-                .select(['ORDER.id', 'ORDER.user_id', 'ORDER.amount'])
-                .where({ user_id: userId })
+            await knex.transaction(async (trx) => {
+                const orders = await trx("ORDER")
+                    .select(['ORDER.id', 'ORDER.user_id', 'ORDER.amount'])
+                    .where({ user_id: userId })
 
-            await Promise.all(orders.map(async order => {
+                let orderlist;
 
-                const orderlist = await knex("ORDER_DISH")
-                    .select(['DISH.price', 'ORDER_DISH.quantity'])
-                    .innerJoin("DISH", "DISH.id", "ORDER_DISH.dish_id")
-                    .where({ order_id: order.id })
+                await Promise.all(orders.map(async order => {
+                    orderlist = await trx("ORDER_DISH")
+                        .select(['DISH.price', 'ORDER_DISH.quantity'])
+                        .innerJoin("DISH", "DISH.id", "ORDER_DISH.dish_id")
+                        .where({ order_id: order.id })
+                }))
 
                 const total = orderlist.reduce((acc, dish) => acc + dish.price * dish.quantity, 0)
 
-                const [order_id] = await knex("ORDER").insert({
+                const [order_id] = await trx("ORDER").insert({
                     user_id: userId,
                     amount: total,
                     payment,
@@ -35,20 +37,20 @@ class OrderController {
                 });
 
                 for (const dish of dishes) {
-                    await knex("ORDER_DISH").insert({
+                    await trx("ORDER_DISH").insert({
                         order_id,
                         dish_id: dish.id,
                         quantity: dish.quantity
                     });
                 }
-            }))
+            });
 
             return response.json({ message: "Pedido criado com sucesso!" });
         } catch (error) {
-
             throw new AppError(error.message, 500);
         }
     }
+
 
     async index(request, response) {
         const userId = request.user.id;
@@ -65,7 +67,7 @@ class OrderController {
                 order.dishes = dishes;
             }));
 
-            return response.json({ orders });
+            return response.json(orders);
         } catch (error) {
 
             throw new AppError(error.message, 500);

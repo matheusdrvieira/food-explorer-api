@@ -88,7 +88,7 @@ class UsersController {
             const userRepository = new UserRepository();
             const orders = await userRepository.index(startDate, endDate);
 
-            return response.status(200).json({ orders });
+            return response.status(200).json(orders);
         } catch (error) {
 
             throw new AppError(error.message, 500);
