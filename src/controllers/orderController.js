@@ -18,7 +18,7 @@ class OrderController {
                     .select(['ORDER.id', 'ORDER.user_id', 'ORDER.amount'])
                     .where({ user_id: userId })
 
-                let orderlist;
+                let orderlist = [];
 
                 await Promise.all(orders.map(async order => {
                     orderlist = await trx("ORDER_DISH")
@@ -50,7 +50,6 @@ class OrderController {
             throw new AppError(error.message, 500);
         }
     }
-
 
     async index(request, response) {
         const userId = request.user.id;
