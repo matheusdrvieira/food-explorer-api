@@ -9,50 +9,90 @@ class OrderController {
         const { dishes } = request.body;
 
         try {
-            await knex.transaction(async (trx) => {
-                const [order_id] = await trx("ORDER").insert({
-                    user_id: userId,
-                    amount: 0,
-                    payment: null,
-                    status: OrderStatus.PENDING
-                });
+            const ordersExists = await knex("ORDER")
+                .where({ user_id: userId })
+                .where({ status: OrderStatus.PENDING });
 
-                for (const dish of dishes) {
-                    await trx("ORDER_DISH").insert({
-                        order_id,
-                        dish_id: dish.id,
-                        quantity: dish.quantity
+            if (!ordersExists.length) {
+                await knex.transaction(async (trx) => {
+                    const [order_id] = await trx("ORDER").insert({
+                        user_id: userId,
+                        amount: 0,
+                        payment: null,
+                        status: OrderStatus.PENDING
                     });
-                }
 
-                const orders = await trx("ORDER")
-                    .select(['ORDER.id', 'ORDER.user_id', 'ORDER.amount'])
-                    .where({ user_id: userId })
+                    for (const dish of dishes) {
+                        await trx("ORDER_DISH").insert({
+                            order_id,
+                            dish_id: dish.id,
+                            quantity: dish.quantity
+                        });
+                    }
 
-
-                let orderlist = [];
-
-                await Promise.all(orders.map(async order => {
-                    const orderDishesQuery = await trx("ORDER_DISH")
+                    const orderDishes = await trx("ORDER_DISH")
                         .select(['DISH.price', 'ORDER_DISH.quantity'])
                         .innerJoin("DISH", "DISH.id", "ORDER_DISH.dish_id")
-                        .where({ order_id: order.id })
+                        .where({ order_id })
 
-                    orderlist.push(...orderDishesQuery);
-                }))
+                    let total = 0;
 
-                let total = 0;
+                    for (const dish of orderDishes) {
+                        total += dish.price * dish.quantity;
+                    }
 
-                for (const dish of orderlist) {
-                    total += dish.price * dish.quantity;
-                }
-
-                await trx("ORDER").where({ id: order_id }).update({
-                    amount: total,
+                    await trx("ORDER").where({ id: order_id }).update({
+                        amount: total,
+                    });
                 });
-            });
 
-            return response.json({ message: "Pedido criado com sucesso!" });
+                return response.json({ message: "Pedido criado com sucesso!" });
+
+            } else {
+                await knex.transaction(async (trx) => {
+                    const orderId = ordersExists[0].id;
+
+                    for (const dish of dishes) {
+                        const existingOrderDish = await trx("ORDER_DISH")
+                            .select("quantity")
+                            .where({ order_id: orderId })
+                            .andWhere({ dish_id: dish.id })
+                            .first();
+
+                        if (existingOrderDish) {
+                            const newQuantity = Number(existingOrderDish.quantity) + Number(dish.quantity);
+                            await trx("ORDER_DISH")
+                                .where({ order_id: orderId })
+                                .andWhere({ dish_id: dish.id })
+                                .update({ quantity: newQuantity });
+                        } else {
+                            await trx("ORDER_DISH").insert({
+                                order_id: orderId,
+                                dish_id: dish.id,
+                                quantity: dish.quantity,
+                            });
+                        }
+                    }
+
+                    const orderDishes = await trx("ORDER_DISH")
+                        .select(['DISH.price', 'ORDER_DISH.quantity'])
+                        .innerJoin("DISH", "DISH.id", "ORDER_DISH.dish_id")
+                        .where({ order_id: orderId })
+
+                    let total = 0;
+
+                    for (const dish of orderDishes) {
+                        total += dish.price * dish.quantity;
+                    }
+
+                    await trx("ORDER").where({ id: orderId }).update({
+                        amount: total,
+                    });
+                });
+
+                return response.json({ message: "Pedido atualizado com sucesso!" });
+            }
+
         } catch (error) {
             throw new AppError(error.message, 500);
         }
