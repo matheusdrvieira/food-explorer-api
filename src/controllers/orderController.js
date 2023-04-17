@@ -139,10 +139,29 @@ class OrderController {
         }
     }
 
+    async updatePaymentMethod(request, response) {
+        const orderId = request.params.id;
+        const { payment } = request.body;
+
+        try {
+            if (!Object.values(PaymentMethod).includes(payment)) {
+
+                return response.status(400).json({ message: "Metodo de pagamento inválido" });
+            }
+
+            await knex("ORDER").update({ payment, updated_at: knex.fn.now() }).where({ id: orderId })
+
+            return response.status(200).json({ message: "Metodo de pagamento atualizado com sucesso" })
+        } catch (error) {
+
+            throw new AppError(error.message, 500);
+        }
+    }
+
     async updateOrder(request, response) {
         try {
             const orderId = request.params.id;
-            const { dishes, payment } = request.body;
+            const { dishes } = request.body;
 
             for (const dish of dishes) {
                 const orderDish = await knex("ORDER_DISH")
@@ -173,24 +192,68 @@ class OrderController {
                 total += orderDish.price * orderDish.quantity;
             }
 
-            if (payment == undefined) {
+            await knex("ORDER").where({ id: orderId }).update({
+                amount: total,
+            });
 
-                await knex("ORDER").where({ id: orderId }).update({
-                    amount: total,
-                    payment: null
-                });
-
-            } else {
-                if (!Object.values(PaymentMethod).includes(payment)) {
-                    return response.status(400).json({ message: "Método de pagamento inválido" });
-                }
-
-                await knex("ORDER").where({ id: orderId }).update({
-                    payment: payment
-                });
-            }
             return response.status(200).json({ message: "Pedido atualizado com sucesso." });
 
+        } catch (error) {
+            throw new AppError(error.message, 500);
+        }
+    }
+
+    async removeDishOrder(request, response) {
+        try {
+            const orderId = request.params.id;
+            const { dishes } = request.body;
+
+            const order = await knex("ORDER")
+                .where({
+                    id: orderId,
+                    user_id: request.user.id,
+                    status: OrderStatus.PENDING
+                })
+                .first();
+
+            if (!order) {
+                return response.status(404).json({ message: "Ordem não encontrada ou não pertence ao usuário correto." });
+            }
+
+            const orderDish = await knex("ORDER_DISH")
+                .where({
+                    order_id: orderId,
+                    dish_id: dishes[0].id
+                })
+                .first();
+
+            if (!orderDish) {
+                return response.status(404).json({ message: "Prato não encontrado na ordem." });
+            }
+
+            await knex("ORDER_DISH")
+                .where({
+                    order_id: orderId,
+                    dish_id: dishes[0].id
+                })
+                .del();
+
+            const orderDishes = await knex("ORDER_DISH")
+                .select(['DISH.price', 'ORDER_DISH.quantity'])
+                .innerJoin("DISH", "DISH.id", "ORDER_DISH.dish_id")
+                .where({ order_id: orderId })
+
+            let total = 0;
+
+            for (const dish of orderDishes) {
+                total += dish.price * dish.quantity;
+            }
+
+            await knex("ORDER").where({ id: orderId }).update({
+                amount: total,
+            });
+
+            return response.status(200).json({ message: "Prato removido com sucesso" });
         } catch (error) {
             throw new AppError(error.message, 500);
         }
