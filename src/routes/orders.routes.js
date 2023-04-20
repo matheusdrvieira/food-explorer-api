@@ -8,9 +8,9 @@ const ordersController = new OrdersController();
 
 ordersRoutes.post("/", ensureAuthenticated(false), ordersController.create);
 ordersRoutes.get("/", ensureAuthenticated(false), ordersController.index);
+ordersRoutes.get("/:id", ensureAuthenticated(false), ordersController.show);
 ordersRoutes.patch("/:id", ensureAuthenticated(true), ordersController.updateStatus);
-ordersRoutes.patch("/:id/payment", ensureAuthenticated(false), ordersController.updatePaymentMethod);
-ordersRoutes.put("/:id", ensureAuthenticated(false), ordersController.updateOrder);
+ordersRoutes.put("/:id", ensureAuthenticated(false), ordersController.updatePaymentMethod);
 ordersRoutes.delete("/:id", ensureAuthenticated(false), ordersController.removeDishOrder);
 
 module.exports = ordersRoutes;

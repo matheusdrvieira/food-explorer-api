@@ -1,5 +1,5 @@
 const PaymentMethod = {
-    CREDIT_CARD: 'Cartão de credito',
+    CREDIT_CARD: 'Cartão de Crédito',
     PIX: 'Pix'
 }
 

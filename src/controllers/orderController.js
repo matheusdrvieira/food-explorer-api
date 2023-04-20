@@ -18,7 +18,7 @@ class OrderController {
                     const [order_id] = await trx("ORDER").insert({
                         user_id: userId,
                         amount: 0,
-                        payment: null,
+                        payment: PaymentMethod.CREDIT_CARD,
                         status: OrderStatus.PENDING
                     });
 
@@ -46,12 +46,11 @@ class OrderController {
                     });
                 });
 
-                return response.json({ message: "Pedido criado com sucesso!" });
+                return response.json({ message: "Pedido criado com sucesso!", order_id });
 
             } else {
+                const orderId = ordersExists[0].id;
                 await knex.transaction(async (trx) => {
-                    const orderId = ordersExists[0].id;
-
                     for (const dish of dishes) {
                         const existingOrderDish = await trx("ORDER_DISH")
                             .select("quantity")
@@ -90,7 +89,7 @@ class OrderController {
                     });
                 });
 
-                return response.json({ message: "Pedido atualizado com sucesso!" });
+                return response.json({ message: "Pedido atualizado com sucesso!", order_id: orderId });
             }
 
         } catch (error) {
@@ -106,7 +105,30 @@ class OrderController {
 
             await Promise.all(orders.map(async order => {
                 const dishes = await knex("ORDER_DISH as OD")
-                    .select("D.name", "OD.quantity", "D.price")
+                    .select("D.id", "D.name", "OD.quantity", "D.price")
+                    .innerJoin("DISH as D", "D.id", "OD.dish_id")
+                    .where({ order_id: order.id })
+
+                order.dishes = dishes;
+            }));
+
+            return response.json(orders);
+        } catch (error) {
+
+            throw new AppError(error.message, 500);
+        }
+    }
+
+    async show(request, response) {
+        const userId = request.user.id;
+        const orderId = request.params.id;
+
+        try {
+            const orders = await knex("ORDER").where({ user_id: userId, id: orderId })
+
+            await Promise.all(orders.map(async order => {
+                const dishes = await knex("ORDER_DISH as OD")
+                    .select("D.id", "D.name", "OD.quantity", "D.price")
                     .innerJoin("DISH as D", "D.id", "OD.dish_id")
                     .where({ order_id: order.id })
 
@@ -154,51 +176,6 @@ class OrderController {
             return response.status(200).json({ message: "Metodo de pagamento atualizado com sucesso" })
         } catch (error) {
 
-            throw new AppError(error.message, 500);
-        }
-    }
-
-    async updateOrder(request, response) {
-        try {
-            const orderId = request.params.id;
-            const { dishes } = request.body;
-
-            for (const dish of dishes) {
-                const orderDish = await knex("ORDER_DISH")
-                    .where({
-                        order_id: orderId,
-                        dish_id: dish.id
-                    }).first();
-
-                await knex("ORDER_DISH")
-                    .where({
-                        order_id: orderId,
-                        dish_id: dish.id
-                    })
-                    .update({
-                        quantity:
-                            Number(dish.quantity) ? Number(dish.quantity) + Number(orderDish.quantity) : Number(orderDish.quantity)
-                    });
-            };
-
-            const orderDishes = await knex("ORDER_DISH")
-                .select(['DISH.price', 'ORDER_DISH.quantity'])
-                .innerJoin("DISH", "DISH.id", "ORDER_DISH.dish_id")
-                .where({ order_id: orderId })
-
-            let total = 0;
-
-            for (const orderDish of orderDishes) {
-                total += orderDish.price * orderDish.quantity;
-            }
-
-            await knex("ORDER").where({ id: orderId }).update({
-                amount: total,
-            });
-
-            return response.status(200).json({ message: "Pedido atualizado com sucesso." });
-
-        } catch (error) {
             throw new AppError(error.message, 500);
         }
     }
