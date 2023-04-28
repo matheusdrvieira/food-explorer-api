@@ -14,7 +14,6 @@ class OrderController {
                 .where({ status: OrderStatus.PENDING });
 
             if (!ordersExists.length) {
-                console.log("entrou no if");
                 await knex.transaction(async (trx) => {
                     const [order_id] = await trx("ORDER").insert({
                         user_id: userId,
@@ -50,9 +49,8 @@ class OrderController {
                 });
 
             } else {
-                console.log("entrou no else");
-                const orderId = ordersExists[0].id;
                 await knex.transaction(async (trx) => {
+                    const orderId = ordersExists[0].id;
                     for (const dish of dishes) {
                         const existingOrderDish = await trx("ORDER_DISH")
                             .select("quantity")
@@ -89,9 +87,9 @@ class OrderController {
                     await trx("ORDER").where({ id: orderId }).update({
                         amount: total,
                     });
-                });
 
-                return response.json({ message: "Pedido atualizado com sucesso!", order_id: orderId });
+                    return response.json({ message: "Pedido atualizado com sucesso!", order_id: orderId });
+                });
             }
 
         } catch (error) {
