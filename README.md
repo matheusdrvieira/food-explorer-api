@@ -48,7 +48,7 @@ Abaixo, temos a modelagem do banco de dados:
 #### Instale as dependências:
 * $npm install
 
-#### Inicie um servidor local para o frontend:
+#### Inicie o servidor local:
 * $npm run dev
 * $npm run migrate
 * $npm run seed
