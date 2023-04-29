@@ -16,7 +16,7 @@ Sendo o usuário um Administrador, ele poderá adicionar pratos, ingredientes e 
 
 Sendo o usuário um Cliente, ele poderá atualizar seu perfil, fazer um pedido, adicionar pratos a os favoritos.
 
-# 🌐DER do banco de dados:
+# 🗄️DER do banco de dados:
 
 ![Estrutura do banco de dados do Projeto](src/assets/foodExplorer.png)
 
