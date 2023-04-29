@@ -33,14 +33,22 @@ Sendo o usuário um Cliente, ele poderá atualizar seu perfil, fazer um pedido, 
 
 # 🔨Funcionalidades
 
-* Cadastrar um usuário;
-* Atualizar e-mail, senha, ou nome de um usuário.
-* Mostrar informações de um pedido especifico;
-* Mostrar todos os pedidos de um usuário ou de todos os usuários.
-* Cadastrar, atualizar, mostrar ou deletar um prato.
-* Cadastrar, ou mostrar um ingrediente.
-* Criar, atualizar, mostrar informações de um pedido.
-* Adicionar e remover pratos a os favoritos.
+* Mostrar todos pratos;
+* Mostrar um prato especifico;
+* Fazer a busca de um prato pelo nome;
+* Adicionar ao carrinho;
+* Visualizar o carrinho;
+* Criar conta;
+* Fazer login;
+* Atualizar informações da conta;
+* Adicionar um prato aos favoritos;
+* Fazer um pedido;
+* Ver a todos os seus pedidos;
+* Ver os detalhes de um pedido especifico;
+* Cadastrar um prato;
+* Editar um prato;
+* Editar a situação de um pedido;
+* Visualizar todos os pedidos feitos por todos os clientes com filtro de data;
 
 # 💡Utilização
 
