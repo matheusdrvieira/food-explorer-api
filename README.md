@@ -91,4 +91,4 @@ admin
 ````
 
 # Autor
-Feito por Dev Matheus da Rocha Vieira 😀 Veja meu [LinkedIn](https://www.linkedin.com/in/matheus-vieira-001b46248/{:target="_blank"}).
+Feito por Dev Matheus da Rocha Vieira 😀 Veja meu <a href="https://www.linkedin.com/in/matheus-vieira-001b46248/" target="_blank">LinkedIn</a>.
