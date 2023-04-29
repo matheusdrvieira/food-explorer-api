@@ -1,4 +1,4 @@
-# Food Explorer - Backend
+# 🍔Food Explorer - Backend
 
 * Esse projeto é um cardápio digital para um restaurante fictício, conhecido como foodExplorer.
 
