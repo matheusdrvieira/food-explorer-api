@@ -80,5 +80,15 @@ npm run seed
 #### Se tudo der certo, a seguinte mensagem vai aparecer no terminal/console:
 ``` Server is running on port 3333. ```
 
+# 🔑Conta administrador:
+* Email: 
+````
+admin@gmail.com
+````
+* senha: 
+````
+admin
+````
+
 # Autor
 Feito por Dev Matheus da Rocha Vieira 😀 Veja meu [LinkedIn](https://www.linkedin.com/in/matheus-vieira-001b46248/).
