@@ -42,19 +42,22 @@ Abaixo, temos a modelagem do banco de dados:
 # 💡Utilização
 
 #### Clone o projeto
-* git clone https:https://github.com/matheusvieira14/food_explorer-Backend_js.git
-* Entre no diretório
+``` git clone https:https://github.com/matheusvieira14/food_explorer-Backend_js.git ```
+
+#### Entre no diretório:
+``` $cd food_explorer-Backend_js ```
 
 #### Instale as dependências:
-* $npm install
+``` $npm install ```
 
 #### Inicie o servidor local:
-* $npm run dev
-* $npm run migrate
-* $npm run seed
-
+``` 
+$npm run dev 
+$npm run migrate
+$npm run seed 
+```
 #### Se tudo der certo, a seguinte mensagem vai aparecer no terminal/console:
-*  Server is running on port 3333.
+```  Server is running on port 3333. ```
 
 # Autor
 Feito por Dev Matheus da Rocha Vieira 😀 Veja meu [LinkedIn](https://www.linkedin.com/in/matheus-vieira-001b46248/).
