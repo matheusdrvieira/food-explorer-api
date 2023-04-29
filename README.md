@@ -6,15 +6,17 @@
 
 # 📝Sobre
 
-Este é backend do Desafio Final do programa Explorer da Rocketseat.
+Este é o backend do Desafio Final do programa Explorer da Rocketseat.
 
-Essa aplicação simula um restaurante fictício, conhecido como foodExplorer, aonde usuários podem se cadastrar e logar.
+Essa aplicação simula um restaurante fictício, conhecido como FoodExplorer, onde usuários podem se cadastrar, logar e realizar pedidos.
 
-Sendo o usuário um Administrador, ele poderá adicionar pratos, ingredients, atualizar pedidos, etc.
+os usuarios sao divididos em dois grupos cliente e adsministrador.
 
-Sendo o usuário um Cliente, ele poderá atualizar o perfil, fazer um pedido, adicionar um produto as favoritos, etc.
+Sendo o usuário um Administrador, ele poderá adicionar pratos, ingredientes e atualizar pedidos.
 
-Abaixo, temos a modelagem do banco de dados:
+Sendo o usuário um Cliente, ele poderá atualizar seu perfil, fazer um pedido, adicionar pratos a os favoritos.
+
+# DER do banco de dados:
 
 ![Estrutura do banco de dados do Projeto](src/assets/foodExplorer.png)
 
@@ -38,6 +40,7 @@ Abaixo, temos a modelagem do banco de dados:
 * Cadastrar, atualizar, mostrar ou deletar um prato.
 * Cadastrar, ou mostrar um ingrediente.
 * Criar, atualizar, mostrar informações de um pedido.
+* Adicionar e remover pratos a os favoritos.
 
 # 💡Utilização
 
@@ -48,23 +51,23 @@ git clone https:https://github.com/matheusvieira14/food_explorer-Backend_js.git
 
 #### Entre no diretório:
 ```` 
-$cd food_explorer-Backend_js 
+cd food_explorer-Backend_js 
 ````
 
 #### Instale as dependências:
 ```` 
-$npm install 
+npm install 
 ````
 
 #### Inicie o servidor local:
 ````
-$npm run dev 
+npm run dev 
 ````
 ````
-$npm run migrate
+npm run migrate
 ````
 ````
-$npm run seed 
+npm run seed 
 ````
 #### Se tudo der certo, a seguinte mensagem vai aparecer no terminal/console:
 ``` Server is running on port 3333. ```
